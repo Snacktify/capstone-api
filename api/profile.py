@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Header
 from api.auth import verify_token
 from pydantic import BaseModel
 import mysql.connector
 
-
 from api.config import DATABASE_CONFIG
+
 router = APIRouter()
 
 
@@ -20,7 +20,16 @@ def get_db_connection():
 
 
 @router.put("/update-profile")
-def update_profile(request: UpdateProfileRequest, token: dict = Depends(verify_token)):
+def update_profile(
+    request: UpdateProfileRequest,
+    authorization: str = Header(None),
+    token: dict = Depends(verify_token)
+):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+
+    # Access token is available as `token` variable
+    access_token = authorization.split(" ")[1]
     connection = get_db_connection()
     cursor = connection.cursor()
 

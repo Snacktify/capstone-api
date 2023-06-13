@@ -42,6 +42,7 @@ def predict_image(uploaded_file: UploadFile, response: Response):
         result = labels[prediction[0]]
         
         return {"prediction": result}
+    
     except Exception as e:
         traceback.print_exc()
         response.status_code = 500

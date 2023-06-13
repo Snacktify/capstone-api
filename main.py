@@ -2,7 +2,6 @@ import os
 import uvicorn
 
 from fastapi import FastAPI
-
 from api.auth import router as auth_router
 from api.profile import router as profile_router
 from api.predict import router as predict_router

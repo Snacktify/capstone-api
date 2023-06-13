@@ -15,15 +15,19 @@ security = HTTPBearer()
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+
 def hash_password(password: str):
     return pwd_context.hash(password)
+
 
 def verify_password(plain_password: str, hashed_password: str):
     return pwd_context.verify(plain_password, hashed_password)
 
+
 def create_access_token(data: dict):
     encoded_jwt = jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
 
 def decode_access_token(token: str):
     try:
@@ -31,6 +35,7 @@ def decode_access_token(token: str):
         return decoded_token
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
+
 
 def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
     if not credentials.scheme == "Bearer":
@@ -65,14 +70,14 @@ def register_user(request: RegisterRequest):
     if existing_user:
         cursor.close()
         connection.close()
-        raise HTTPException(status_code=400, detail = "User already exists")
+        raise HTTPException(status_code=400, detail="User already exists")
 
     if request.password != request.repeat_password:
         cursor.close()
         connection.close()
-        raise HTTPException(status_code=400, detail = "Passwords do not match")
+        raise HTTPException(status_code=400, detail="Passwords do not match")
 
-    hashed_password = hash_password(request.password)
+    hashed_password = hash_password(request.password)  # Hash the password
     insert_query = "INSERT INTO users (email, password) VALUES (%s, %s)"
     cursor.execute(insert_query, (request.email, hashed_password))
 
@@ -90,8 +95,9 @@ def login(request: LoginRequest):
 
     cursor.execute("SELECT * FROM users WHERE email = %s", (request.email,))
     existing_user = cursor.fetchone()
+
     if existing_user:
-        if verify_password(request.password, existing_user[1]):
+        if verify_password(request.password, existing_user[2]):
             access_token = create_access_token({"sub": request.email})
             cursor.close()
             connection.close()
