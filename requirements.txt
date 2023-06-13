@@ -4,3 +4,7 @@ pydantic
 passlib[bcrypt]
 python-jose
 mysql-connector-python
+python-multipart
+numpy
+Pillow
+tensorflow
