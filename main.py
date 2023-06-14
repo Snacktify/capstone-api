@@ -6,6 +6,7 @@ from api.auth import router as auth_router
 from api.profile import router as profile_router
 from api.predict import router as predict_router
 from api.predict2 import router as predict2_router
+from api.snackvidia import router as snackvidia_router
 
 app = FastAPI()
 
@@ -13,10 +14,11 @@ app.include_router(auth_router)
 app.include_router(profile_router)
 app.include_router(predict_router)
 app.include_router(predict2_router)
+app.include_router(snackvidia_router)
 
 @app.get("/")
 def index():
-    return "Hello world from API!"
+    return "Hi, welcome to the snacktify API"
 
 # Starting the server
 port = os.environ.get("PORT", 8080)
