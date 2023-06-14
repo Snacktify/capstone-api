@@ -1,12 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, Header
-from api.auth import verify_token
+from fastapi import APIRouter, Depends, HTTPException, Cookie
+from api.auth import decode_access_token, verify_token
 from pydantic import BaseModel
 import mysql.connector
 
-from api.config import DATABASE_CONFIG
+from api.config import USER_CONFIG
 
 router = APIRouter()
-
 
 class UpdateProfileRequest(BaseModel):
     full_name: str
@@ -16,24 +15,26 @@ class UpdateProfileRequest(BaseModel):
 
 
 def get_db_connection():
-    return mysql.connector.connect(**DATABASE_CONFIG)
+    return mysql.connector.connect(**USER_CONFIG)
+
+
+async def get_current_user(access_token: str = Cookie(None)):
+    if not access_token:
+        raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+
+    decoded_token = decode_access_token(access_token)
+    return decoded_token
 
 
 @router.put("/update-profile")
 def update_profile(
     request: UpdateProfileRequest,
-    authorization: str = Header(None),
-    token: dict = Depends(verify_token)
+    current_user: dict = Depends(get_current_user),
 ):
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Invalid authentication credentials")
-
-    # Access token is available as `token` variable
-    access_token = authorization.split(" ")[1]
     connection = get_db_connection()
     cursor = connection.cursor()
 
-    cursor.execute("SELECT * FROM users WHERE email = %s", (token.get("sub"),))
+    cursor.execute("SELECT * FROM users WHERE email = %s", (current_user.get("sub"),))
     existing_profile = cursor.fetchone()
     if existing_profile:
         update_query = "UPDATE users SET full_name = %s, username = %s, email = %s, phone_number = %s WHERE email = %s"
@@ -44,7 +45,7 @@ def update_profile(
                 request.username,
                 request.new_email,
                 request.phone_number,
-                token.get("sub"),
+                current_user.get("sub"),
             ),
         )
 

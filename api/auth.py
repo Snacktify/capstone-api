@@ -1,33 +1,28 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Response
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 from pydantic import BaseModel
 import mysql.connector
 
-from api.config import DATABASE_CONFIG
+from api.config import USER_CONFIG
 
 SECRET_KEY = "Snacktify-Secret-Key-Mastered"
 ALGORITHM = "HS256"
 
 router = APIRouter()
 security = HTTPBearer()
-
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 
 def hash_password(password: str):
     return pwd_context.hash(password)
 
-
 def verify_password(plain_password: str, hashed_password: str):
     return pwd_context.verify(plain_password, hashed_password)
-
 
 def create_access_token(data: dict):
     encoded_jwt = jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
-
 
 def decode_access_token(token: str):
     try:
@@ -36,7 +31,6 @@ def decode_access_token(token: str):
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-
 def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
     if not credentials.scheme == "Bearer":
         raise HTTPException(status_code=401, detail="Invalid authentication scheme")
@@ -44,21 +38,17 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
     decoded_token = decode_access_token(credentials.credentials)
     return decoded_token
 
-
 class RegisterRequest(BaseModel):
     email: str
     password: str
     repeat_password: str
 
-
 class LoginRequest(BaseModel):
     email: str
     password: str
 
-
 def get_db_connection():
-    return mysql.connector.connect(**DATABASE_CONFIG)
-
+    return mysql.connector.connect(**USER_CONFIG)
 
 @router.post("/register")
 def register_user(request: RegisterRequest):
@@ -88,6 +78,7 @@ def register_user(request: RegisterRequest):
     return {"message": "User registered successfully"}
 
 
+
 @router.post("/login")
 def login(request: LoginRequest):
     connection = get_db_connection()
@@ -99,9 +90,11 @@ def login(request: LoginRequest):
     if existing_user:
         if verify_password(request.password, existing_user[2]):
             access_token = create_access_token({"sub": request.email})
+            response = Response()
+            response.set_cookie(key="access_token", value=access_token, httponly=True)
             cursor.close()
             connection.close()
-            return {"access_token": access_token, "token_type": "bearer"}
+            return response
         else:
             cursor.close()
             connection.close()
