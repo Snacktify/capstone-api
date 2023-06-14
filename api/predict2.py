@@ -9,7 +9,7 @@ from fastapi import FastAPI, Response, UploadFile, APIRouter
 router = APIRouter()
 
 # Initialize Model
-model = tf.saved_model.load("./api//snackscan/1")
+model = tf.saved_model.load("./api/snackscan/1")
 
 # Predict endpoint
 labels = ['grontol', 'lanting', 'lumpia', 'putu ayu', 'serabi solo', 'wajik']
@@ -22,18 +22,22 @@ def predict_image(uploaded_file: UploadFile, response: Response):
             response.status_code = 400
             return "File is Not an Image"
         
+        # Read image
         image = cv2.imdecode(np.frombuffer(uploaded_file.file.read(), np.uint8), cv2.IMREAD_COLOR)
-        print("Image shape:", image.shape)
         
+        # Convert BGR to RGB
+        image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        print("Image shape:", image.shape)
+
         # Step 1: Resize image to (150, 150)
-        image = cv2.resize(image, (150, 150))
-        image = image / 255.0
+        image_rgb = cv2.resize(image_rgb, (150, 150))
+        image_rgb = image_rgb / 255.0
         
         # Step 2: Prepare data to model
-        image = np.expand_dims(image, 0)
+        image_rgb = np.expand_dims(image_rgb, 0)
         
         # Step 3: Predict the data
-        output = model.signatures["serving_default"](tf.constant(image.astype(np.float32)))
+        output = model.signatures["serving_default"](tf.constant(image_rgb.astype(np.float32)))
         predictions = output["dense_27"].numpy()
         prediction = np.argmax(predictions)
         result = labels[prediction]
