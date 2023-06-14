@@ -98,7 +98,7 @@ def login(request: LoginRequest):
         else:
             cursor.close()
             connection.close()
-            raise HTTPException(status_code=401, detail="Invalid credentials")
+            raise HTTPException(status_code=401, detail="Wrong Password")
 
     cursor.close()
     connection.close()
