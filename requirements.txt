@@ -10,4 +10,5 @@ Pillow
 tensorflow
 pyjwt
 jose
-starlette.middleware.cors
+starlette
+opencv-python
