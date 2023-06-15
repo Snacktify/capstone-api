@@ -22,6 +22,9 @@ origins = [
     "http://localhost",
     "http://localhost:8080",
     "http://127.0.0.1:5500",
+    "http://34.128.89.110:8080",
+    "https://storage.googleapis.com/static-website-snacktify/Landing.html"
+
     # Tambahkan asal lainnya yang diperlukan
 ]
 
