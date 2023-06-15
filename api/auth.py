@@ -94,7 +94,7 @@ def login(request: LoginRequest):
             response.set_cookie(key="access_token", value=access_token, httponly=True)
             cursor.close()
             connection.close()
-            return response
+            return {"token":access_token}
         else:
             cursor.close()
             connection.close()

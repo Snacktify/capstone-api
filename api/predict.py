@@ -13,12 +13,8 @@ model = tf.saved_model.load("./api/snackscan/1")
 # Predict endpoint
 labels = ['grontol', 'lanting', 'lumpia', 'putu ayu', 'serabi solo', 'wajik']
 
-async def get_current_user(access_token: str = Cookie(None)):
-    if not access_token:
-        raise HTTPException(status_code=401, detail="Invalid authentication credentials")
-
-    decoded_token = decode_access_token(access_token)
-    return decoded_token
+async def get_current_user(token: str = Depends(verify_token)):
+    return token
 
 @router.post("/predict_image")
 def predict_image(uploaded_file: UploadFile, response: Response, current_user: dict = Depends(get_current_user)):

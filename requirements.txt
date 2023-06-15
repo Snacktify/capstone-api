@@ -10,3 +10,4 @@ Pillow
 tensorflow
 pyjwt
 jose
+starlette.middleware.cors

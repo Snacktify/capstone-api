@@ -18,12 +18,8 @@ def get_db_connection():
     return mysql.connector.connect(**USER_CONFIG)
 
 
-async def get_current_user(access_token: str = Cookie(None)):
-    if not access_token:
-        raise HTTPException(status_code=401, detail="Invalid authentication credentials")
-
-    decoded_token = decode_access_token(access_token)
-    return decoded_token
+async def get_current_user(token: str = Depends(verify_token)):
+    return token
 
 
 @router.put("/update-profile")
