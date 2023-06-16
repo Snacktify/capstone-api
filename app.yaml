@@ -1,2 +1,14 @@
 runtime: python39
+runtime: python39
+service: api-service
+instance_class: F2
+
 entrypoint: uvicorn main:app --host=0.0.0.0 --port=8080
+
+automatic_scaling:
+  min_instances: 1
+  max_instances: 10
+  target_cpu_utilization: 0.65
+
+health_check:
+  enable_health_check: True
