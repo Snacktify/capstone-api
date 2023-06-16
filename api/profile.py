@@ -10,7 +10,7 @@ router = APIRouter()
 class UpdateProfileRequest(BaseModel):
     full_name: str
     username: str
-    new_email: str
+    email: str
     phone_number: str
 
 
@@ -32,6 +32,7 @@ def update_profile(
 
     cursor.execute("SELECT * FROM users WHERE email = %s", (current_user.get("sub"),))
     existing_profile = cursor.fetchone()
+    print(existing_profile)
     if existing_profile:
         update_query = "UPDATE users SET full_name = %s, username = %s, email = %s, phone_number = %s WHERE email = %s"
         cursor.execute(
@@ -39,7 +40,7 @@ def update_profile(
             (
                 request.full_name,
                 request.username,
-                request.new_email,
+                request.email,
                 request.phone_number,
                 current_user.get("sub"),
             ),
