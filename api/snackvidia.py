@@ -15,6 +15,7 @@ class Snack(BaseModel):
     rating: Any
     asal_daerah: Any
     harga: Any
+    link_gambar: Any
 
 def get_db_connection():
     return mysql.connector.connect(**SNACKVIDIA_CONFIG)
@@ -35,7 +36,7 @@ def get_snacks(current_user: dict = Depends(get_current_user)):
     if len(result) == 0:
         return {"message": "No Snack Data"}
     for row in result:
-        objekSnack = Snack(nama_snack=row[0], deskripsi=row[1], rating=row[2], asal_daerah=row[3], harga=row[4])
+        objekSnack = Snack(nama_snack=row[0], deskripsi=row[1], rating=row[2], asal_daerah=row[3], harga=row[4], link_gambar=row[5])
         snacks.append(objekSnack)
     return snacks
 
@@ -45,7 +46,7 @@ def get_snack(nama_snack: str, current_user: dict = Depends(get_current_user)):
     mycursor.execute("SELECT * FROM snackvidia WHERE nama_snack = %s", (nama_snack,))
     result = mycursor.fetchone()
     if result:
-        objekSnack = Snack(nama_snack=result[0], deskripsi=result[1], rating=result[2], asal_daerah=result[3], harga=result[4])
+        objekSnack = Snack(nama_snack=result[0], deskripsi=result[1], rating=result[2], asal_daerah=result[3], harga=result[4], link_gambar=result[5])
         return objekSnack
     else:
         raise HTTPException(status_code=404, detail="Snack not found")
