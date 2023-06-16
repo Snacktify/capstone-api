@@ -1,5 +1,4 @@
 runtime: python39
-runtime: python39
 service: api-service
 instance_class: F2
 
